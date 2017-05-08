@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+  <style>
+body {
+  padding: 0;
+  background-color: transparent;
+  font-family: Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;
+  font-weight: 300;
+}
+#main {
+  padding: 15px;
+  border-radius: 8px;
+}
+table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  color: #fff;
+}
+table td, table th {
+  width: 120px;
+  padding: 10px;
+  background-color: transparent;
+  border: 1px solid #fff;
+}
+table tr {
+  background-color: transparent;
+}
+table tr:nth-child(even) {
+  background-color: transparent;
+}
+.current {
+  background-color: yellow;
+  color: #000;
+}
+</style>
+</head>
+
+<body>
+  <script>
+    const remote = require('electron').remote;
+    const {
+      Menu, MenuItem
+    } = remote;
+    const os = require('os');
+
+    const popUpMenu = new Menu();
+    popUpMenu.append(new MenuItem({
+      label: 'MenuItem1',
+      click() {
+        console.log('item 1 clicked');
+      }
+    }));
+    popUpMenu.append(new MenuItem({
+      type: 'separator'
+    }));
+    popUpMenu.append(new MenuItem({
+      label: 'MenuItem2',
+      type: 'checkbox',
+      checked: true
+    }));
+    window.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      popUpMenu.popup(remote.getCurrentWindow());
+    }, false);
+
+    const template = [
+      {
+        label: '編集',
+        submenu: [
+          {
+            role: 'undo'
+        },
+          {
+            role: 'redo'
+        },
+          {
+            type: 'separator'
+        },
+          {
+            role: 'cut'
+        },
+          {
+            role: 'copy'
+        },
+          {
+            role: 'paste'
+        },
+          {
+            role: 'pasteandmatchstyle'
+        },
+          {
+            role: 'delete'
+        },
+          {
+            role: 'selectall'
+        },
+      ]
+    },
+      {
+        label: '表示',
+        submenu: [
+          {
+            label: 'Reload',
+            accelerator: 'CmdOrCtrl+R',
+            click(item, focusedWindow) {
+              if (focusedWindow) focusedWindow.reload();
+            }
+        },
+          {
+            role: 'togglefullscreen'
+        },
+          {
+            label: 'Toggle Developer Tools',
+            accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+            click(item, focusedWindow) {
+              if (focusedWindow)
+                focusedWindow.webContents.toggleDevTools();
+            }
+        },
+      ]
+    },
+      {
+        role: 'ウィンドウ',
+        submenu: [
+          {
+            role: 'minimize'
+        },
+          {
+            role: 'close'
+        },
+      ]
+    },
+      {
+        role: 'help',
+        submenu: [
+          {
+            label: 'Learn More',
+            click() {
+              require('electron').shell.openExternal('http://electron.atom.io');
+            }
+        },
+      ]
+    },
+  ];
+
+    if (process.platform === 'darwin') {
+      const name = require('electron').remote.app.getName();
+      template.unshift({
+        label: name,
+        submenu: [
+          {
+            role: 'about'
+        },
+          {
+            type: 'separator'
+        },
+          {
+            role: 'services',
+            submenu: []
+        },
+          {
+            type: 'separator'
+        },
+          {
+            role: 'hide'
+        },
+          {
+            role: 'hideothers'
+        },
+          {
+            role: 'unhide'
+        },
+          {
+            type: 'separator'
+        },
+          {
+            role: 'quit'
+        },
+      ]
+      });
+      // Window menu.
+      template[3].submenu = [
+        {
+          label: 'Close',
+          accelerator: 'CmdOrCtrl+W',
+          role: 'close'
+      },
+        {
+          label: 'Minimize',
+          accelerator: 'CmdOrCtrl+M',
+          role: 'minimize'
+      },
+        {
+          label: 'ズーム',
+          role: 'zoom'
+      },
+        {
+          type: 'separator'
+      },
+        {
+          label: 'Bring All to Front',
+          role: 'front'
+      }
+    ];
+    }
+
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
+  </script>
+<div id="main">
+  <div id="cal1"></div>
+</div>
+  <script>
+function calendar(s, date) {
+  months = new Array('January','February','March','April','May','June','July','August','September','October','November','December');
+  weekdays = new Array('日','月','火','水','木','金','土');
+
+  if(date == null) {
+    date = new Date();
+  }
+
+  day = date.getDate();
+  month = date.getMonth();
+  year = date.getFullYear();
+  
+  this_month = new Date(year, month, 1);
+  next_month = new Date(year, month + 1, 1);
+
+  // 曜日
+  first_week_day = this_month.getDay();
+  days_in_this_month = Math.round((next_month.getTime() - this_month.getTime()) / (1000 * 60 * 60 * 24));
+
+  calendar_html = '<table>';
+
+  // 1行目 年月の表示
+  calendar_html += '<tr><td colspan="7">'+ year + '年 ' + (month+1) + '月' + '</td></tr>';
+  calendar_html += '<tr>';
+  
+  // 2行目 曜日の表示
+  calendar_html += '<tr>';
+  for(week_day = 0; week_day < 7; week_day++) {
+    calendar_html += '<td>'+weekdays[week_day]+'</td>';
+  }
+  calendar_html += '</tr>';
+
+  // 3行目 先月の最終週
+  calendar_html += '<tr>';
+  for(week_day = 0; week_day < first_week_day; week_day++) {
+    calendar_html += '<td></td>';
+  }
+
+  // 3行目~最終行まで
+  week_day = first_week_day;
+  for(day_counter = 1; day_counter <= days_in_this_month; day_counter++) {
+    week_day %= 7;
+    if(week_day == 0)
+      calendar_html += '</tr><tr>';
+    if(day == day_counter) {
+      calendar_html += '<td class="current">' + day_counter + '</td>';
+    } else {
+      calendar_html += '<td>' + day_counter + ' </td>';
+    }
+    week_day++;
+  }
+  calendar_html += '</tr>';
+
+  calendar_html += '</table>';
+
+  document.getElementById(s).innerHTML = calendar_html;
+}
+
+calendar('cal1', new Date());
+setInterval(function(){
+  calendar('cal1', new Date());
+}, 60000);
+</script>
+</body>
+
+</html>
