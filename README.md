@@ -1,6 +1,6 @@
 # Electron Calendar App
 
-![]("./screenshot.png")
+![](screenshot.png)
 
 ## Try it!
 
