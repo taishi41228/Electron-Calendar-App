@@ -1,0 +1,38 @@
+body {
+    padding: 0;
+    background-color: transparent;
+    font-family: Helvetica Neue, Helvetica, Roboto, Arial, sans-serif;
+    font-weight: 300;
+}
+
+#main {
+    padding: 15px;
+    border-radius: 8px;
+}
+
+table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    color: #fff;
+}
+
+table td,
+table th {
+    width: 120px;
+    padding: 10px;
+    background-color: transparent;
+    border: 1px solid #fff;
+}
+
+table tr {
+    background-color: transparent;
+}
+
+table tr:nth-child(even) {
+    background-color: transparent;
+}
+
+.current {
+    background-color: yellow;
+    color: #000;
+}
